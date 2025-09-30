@@ -9,19 +9,16 @@
     <!-- Inter Font -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
     <style>
-        /* Varsayılan olarak açık tema */
+        /* GÜNCELLENDİ: Daha iyi bir açık tema için temel stiller */
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f9fafb; /* Açık tema için hafif kirli beyaz */
-            color: #1f2937; /* Koyu gri metin */
+            background-color: #f1f5f9; /* Açık tema için Slate 100 */
+            color: #1e293b; /* Açık tema için Slate 800 */
         }
-        /* Spotify Koyu Tema */
+        /* Koyu Tema Stilleri (Değişiklik yok, hala iyi) */
         .dark body {
-            background-color: #121212; /* Spotify'a yakın, çok koyu gri */
-            color: #e5e7eb; /* Açık gri metin */
-        }
-        .dark .bg-white {
-             background-color: #1E1E1E !important;
+            background-color: #0f172a; /* Koyu tema için Slate 900 */
+            color: #cbd5e1; /* Koyu tema için Slate 300 */
         }
         .line-clamp-2 {
             display: -webkit-box;
@@ -37,21 +34,20 @@
 </head>
 <body class="transition-colors duration-300">
 
-    <!-- YENİ: Sol Kenar Tetikleme Alanı (Sadece Masaüstü) -->
+    <!-- Sol Kenar Tetikleme Alanı (Sadece Masaüstü) -->
     <div id="sidebar-trigger" class="fixed top-0 left-0 h-full w-4 z-40 cursor-pointer hidden md:block" onmouseenter="handleMouseEnterSidebar()"></div>
 
-    <!-- 1. Sidebar Karartma Katmanı (Overlay) -->
-    <div id="sidebar-overlay" onclick="toggleHistorySidebar(false)" class="fixed inset-0 bg-black bg-opacity-60 z-20 hidden transition-opacity duration-300"></div>
+    <!-- Sidebar Karartma Katmanı (Overlay) -->
+    <div id="sidebar-overlay" onclick="toggleHistorySidebar(false)" class="fixed inset-0 bg-black bg-opacity-60 z-40 hidden transition-opacity duration-300"></div>
 
-    <!-- 2. Sol Kenar Çubuğu (Geçmiş) - onmouseleave eklendi -->
-    <aside id="history-sidebar" class="fixed top-0 left-0 h-full w-full sm:w-80 bg-white dark:bg-[#1E1E1E] p-4 border-r border-gray-200 dark:border-[#282828] transition-transform duration-300 transform -translate-x-full z-30 shadow-xl flex flex-col" onmouseleave="handleMouseLeaveSidebar()">
+    <!-- Sol Kenar Çubuğu (Geçmiş) -->
+    <aside id="history-sidebar" class="fixed top-0 left-0 h-full w-full sm:w-80 bg-white dark:bg-slate-900/95 backdrop-blur-sm p-4 border-r border-slate-200 dark:border-slate-800 transition-transform duration-300 transform -translate-x-full z-50 shadow-xl flex flex-col" onmouseleave="handleMouseLeaveSidebar()">
         
         <div class="flex justify-between items-center mb-4">
-            <h2 class="text-xl font-bold text-gray-800 dark:text-gray-100">Prompt Geçmişi</h2>
+            <h2 class="text-xl font-bold text-slate-800 dark:text-slate-100">Prompt Geçmişi</h2>
             <div class="flex items-center space-x-2">
                 <button onclick="clearHistory()" class="text-xs text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 font-medium disabled:opacity-50 transition duration-150" id="clear-history-button" disabled>Temizle</button>
-                <!-- YENİ: Kapatma Butonu -->
-                <button onclick="toggleHistorySidebar(false)" class="p-1 rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-[#282828]" title="Kapat">
+                <button onclick="toggleHistorySidebar(false)" class="p-1 rounded-full text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700" title="Kapat">
                      <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
                     </svg>
@@ -59,32 +55,32 @@
             </div>
         </div>
         <div id="history-list" class="flex-grow overflow-y-auto space-y-3 pr-2">
-            <p id="no-history-message" class="text-gray-500 italic text-sm dark:text-gray-400">Henüz geçmiş yok. Prompt geliştirmeye başlayın.</p>
-            <!-- Geçmiş öğeleri buraya eklenecek -->
+            <p id="no-history-message" class="text-slate-500 italic text-sm dark:text-slate-400">Henüz geçmiş yok. Prompt geliştirmeye başlayın.</p>
         </div>
     </aside>
 
-    <!-- 3. Sağ Ana İçerik (Form ve Çıktı) - MAIN CONTENT -->
+    <!-- Ana İçerik (Form ve Çıktı) -->
     <main class="w-full p-4 md:p-10">
-        <!-- Ana İçerik Konteyneri (Kart stili kaldırıldı) -->
         <div class="w-full max-w-4xl mx-auto">
             
-            <!-- Başlık ve Butonlar -->
+            <!-- GÜNCELLENDİ: Başlık ve Butonların Yeni Düzeni -->
             <header class="text-center mb-8 flex justify-between items-center">
-                <!-- Geçmiş Menüsü Butonu -->
-                <div class="w-10">
-                    <button id="history-toggle-button" onclick="toggleHistorySidebar()" class="p-2 rounded-full text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-[#282828] transition duration-150" title="Geçmişi Görüntüle">
+                <!-- Sol tarafı dengelemek için boş div -->
+                <div class="w-24"></div>
+                
+                <div class="flex-grow text-center">
+                    <h1 class="text-3xl font-bold text-indigo-600 dark:text-indigo-400">Yc Promt</h1>
+                    <p class="text-slate-500 dark:text-slate-400 mt-2">Yapay zeka modellerinden en iyi sonuçları almak için promptunuzu optimize edin.</p>
+                </div>
+
+                <!-- KONTROL BUTONLARI: Sağ tarafta gruplandırıldı -->
+                <div class="w-24 flex items-center justify-end space-x-2">
+                    <button id="history-toggle-button" onclick="toggleHistorySidebar()" class="p-2 rounded-full text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition duration-150" title="Geçmişi Görüntüle">
                         <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
                         </svg>
                     </button>
-                </div>
-                <div class="flex-grow text-center">
-                    <h1 class="text-3xl font-bold text-indigo-600 dark:text-indigo-400">Yc Promt</h1>
-                    <p class="text-gray-500 dark:text-gray-400 mt-2">Yapay zeka modellerinden en iyi sonuçları almak için promptunuzu optimize edin.</p>
-                </div>
-                <div class="w-10">
-                    <button id="theme-toggle" onclick="toggleTheme()" class="p-2 rounded-full text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-[#282828] transition duration-150" title="Temayı Değiştir">
+                    <button id="theme-toggle" onclick="toggleTheme()" class="p-2 rounded-full text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition duration-150" title="Temayı Değiştir">
                         <svg id="theme-icon" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <!-- İkon JS ile ayarlanacak -->
                         </svg>
@@ -92,32 +88,27 @@
                 </div>
             </header>
 
-            <!-- Giriş Formu ve diğer içerikler... -->
             <!-- Giriş Formu -->
             <div id="input-section" class="space-y-6">
                 
-                <!-- Ham Prompt Girişi -->
                 <div>
-                    <label for="raw-prompt" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">1. Ham Promptunuz</label>
-                    <textarea id="raw-prompt" rows="4" class="w-full p-3 border border-gray-300 bg-white dark:border-[#383838] dark:bg-[#282828] dark:text-white rounded-lg focus:ring-indigo-500 focus:border-indigo-500 transition duration-150" placeholder="Örneğin: Uzayda yüzen bir kedi resmi yap."></textarea>
+                    <label for="raw-prompt" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">1. Ham Promptunuz</label>
+                    <textarea id="raw-prompt" rows="4" class="w-full p-3 border border-slate-300 bg-white dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-150" placeholder="Örneğin: Uzayda yüzen bir kedi resmi yap."></textarea>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    
-                    <!-- Hedef Yapay Zeka Seçimi -->
                     <div>
-                        <label for="target-ai" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">2. Hedef Yapay Zeka Platformu</label>
-                        <select id="target-ai" class="w-full p-3 border border-gray-300 dark:border-[#383838] dark:bg-[#282828] dark:text-white bg-white rounded-lg focus:ring-indigo-500 focus:border-indigo-500 appearance-none transition duration-150">
+                        <label for="target-ai" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">2. Hedef Yapay Zeka Platformu</label>
+                        <select id="target-ai" class="w-full p-3 border border-slate-300 bg-white dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 appearance-none transition duration-150">
                             <option value="Gemini">Gemini</option>
                             <option value="DeepSeek">DeepSeek</option>
                             <option value="ChatGPT">ChatGPT (GPT Modelleri)</option>
                         </select>
                     </div>
 
-                    <!-- İçerik Türü Seçimi -->
                     <div>
-                        <label for="content-type" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">3. İçerik Türü</label>
-                        <select id="content-type" class="w-full p-3 border border-gray-300 dark:border-[#383838] dark:bg-[#282828] dark:text-white bg-white rounded-lg focus:ring-indigo-500 focus:border-indigo-500 appearance-none transition duration-150">
+                        <label for="content-type" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">3. İçerik Türü</label>
+                        <select id="content-type" class="w-full p-3 border border-slate-300 bg-white dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 appearance-none transition duration-150">
                             <option value="Kod">Kod (Profesyonel Prompt Üret)</option>
                             <option value="Görsel">Görsel (Sanat, Fotoğraf)</option>
                             <option value="Yazı">Yazı (Makale, Şiir, Hikaye)</option>
@@ -125,7 +116,6 @@
                     </div>
                 </div>
 
-                <!-- İşlem Butonu -->
                 <button id="process-button" onclick="professionalizePrompt()" class="w-full py-3 px-4 bg-indigo-600 text-white font-semibold rounded-lg shadow-md hover:bg-indigo-700 focus:outline-none focus:ring-4 focus:ring-indigo-500 focus:ring-opacity-50 transition duration-150 transform hover:scale-[1.01] flex items-center justify-center disabled:opacity-50" disabled>
                     <span id="button-text">Promtu Profesyonelleştir</span>
                     <svg id="loading-spinner" class="animate-spin -ml-1 mr-3 h-5 w-5 text-white hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -136,16 +126,16 @@
             </div>
 
             <!-- Profesyonel Prompt Çıktısı -->
-            <div id="output-section" class="mt-10 pt-6 border-t border-indigo-200 dark:border-indigo-800">
-                <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4">4. Profesyonel Prompt Sonucu</h2>
-                <div id="professional-prompt-container" class="min-h-[100px] bg-white dark:bg-[#282828] p-4 rounded-lg border border-indigo-200 dark:border-[#383838] relative transition-colors duration-300">
-                    <p id="professional-prompt" class="text-gray-800 dark:text-gray-200 whitespace-pre-wrap">Promtu girmek ve geliştirmek için yukarıdaki formu kullanın.</p>
+            <div id="output-section" class="mt-10 pt-6 border-t border-slate-200 dark:border-slate-800">
+                <h2 class="text-xl font-semibold text-slate-800 dark:text-slate-200 mb-4">4. Profesyonel Prompt Sonucu</h2>
+                <div id="professional-prompt-container" class="min-h-[100px] bg-white dark:bg-slate-800 p-4 rounded-lg border border-slate-300 dark:border-slate-700 relative transition-colors duration-300">
+                    <p id="professional-prompt" class="text-slate-800 dark:text-slate-200 whitespace-pre-wrap">Promtu girmek ve geliştirmek için yukarıdaki formu kullanın.</p>
                     <button id="copy-button" onclick="copyPrompt()" class="absolute top-2 right-2 p-2 bg-indigo-600 text-white rounded-lg shadow-md hover:bg-indigo-700 text-xs font-medium opacity-0 transition duration-300" title="Kopyala">
                         Kopyala
                     </button>
                 </div>
-                <div id="copy-message" class="text-sm text-green-600 mt-2 hidden">Kopyalandı!</div>
-                <div id="error-message" class="text-sm text-red-600 mt-2 hidden"></div>
+                <div id="copy-message" class="text-sm text-green-600 dark:text-green-500 mt-2 hidden">Kopyalandı!</div>
+                <div id="error-message" class="text-sm text-red-600 dark:text-red-500 mt-2 hidden"></div>
             </div>
 
         </div>
@@ -184,11 +174,8 @@
         const sidebarOverlay = document.getElementById('sidebar-overlay');
         const themeIconElement = document.getElementById('theme-icon');
 
-        /**
-         * YENİ: Fare ile açma/kapama (Sadece Masaüstü)
-         */
         window.handleMouseEnterSidebar = function() {
-            if (window.innerWidth >= 768) { // 768px = md breakpoint
+            if (window.innerWidth >= 768) { 
                 toggleHistorySidebar(true);
             }
         }
@@ -198,10 +185,6 @@
             }
         }
 
-        /**
-         * GÜNCELLENDİ: Geçmiş sidebar'ını açıp kapatan fonksiyon
-         * forceState: true (aç), false (kapat), undefined (değiştir)
-         */
         window.toggleHistorySidebar = function(forceState) {
             const isHidden = historySidebar.classList.contains('-translate-x-full');
             const shouldOpen = forceState === undefined ? isHidden : forceState;
@@ -217,12 +200,10 @@
             }
         }
 
-        // Girdi Kontrolü ve Buton Etkinleştirme
         rawPromptInput.addEventListener('input', () => {
             processButton.disabled = rawPromptInput.value.trim().length < 5;
         });
 
-        // Kopyalama Butonunun Görünürlüğü
         professionalPromptContainer.addEventListener('mouseenter', () => {
             if (professionalPromptElement.innerText.length > 5 && professionalPromptElement.innerText !== 'Promtu girmek ve geliştirmek için yukarıdaki formu kullanın.') {
                 copyButton.classList.remove('opacity-0');
@@ -368,7 +349,7 @@
                 clearHistoryButton.disabled = false;
                 history.forEach(item => {
                     const el = document.createElement('div');
-                    el.className = 'p-3 rounded-lg bg-gray-100 dark:bg-[#282828] cursor-pointer hover:bg-indigo-100 dark:hover:bg-[#383838] transition duration-150';
+                    el.className = 'p-3 rounded-lg bg-slate-100 dark:bg-slate-800 cursor-pointer hover:bg-indigo-100 dark:hover:bg-slate-700 transition duration-150';
                     el.onclick = () => {
                         rawPromptInput.value = item.raw;
                         professionalPromptElement.innerText = item.professional;
@@ -376,9 +357,9 @@
                         contentTypeSelect.value = item.type;
                         processButton.disabled = false;
                         copyButton.classList.remove('opacity-0');
-                        toggleHistorySidebar(false); // Geçmişten seçince sidebar'ı kapat
+                        toggleHistorySidebar(false);
                     };
-                    el.innerHTML = `<p class="font-semibold text-sm text-gray-800 dark:text-gray-200 line-clamp-2">${item.raw}</p><p class="text-xs text-gray-500 dark:text-gray-400 mt-1">${item.ai} - ${item.type} - ${new Date(item.date).toLocaleDateString('tr-TR')}</p>`;
+                    el.innerHTML = `<p class="font-semibold text-sm text-slate-800 dark:text-slate-200 line-clamp-2">${item.raw}</p><p class="text-xs text-slate-500 dark:text-slate-400 mt-1">${item.ai} - ${item.type} - ${new Date(item.date).toLocaleDateString('tr-TR')}</p>`;
                     historyList.appendChild(el);
                 });
             }
@@ -399,17 +380,21 @@
             }
         }
         window.toggleTheme = function() {
-            const currentTheme = localStorage.getItem(THEME_KEY) || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            const currentTheme = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
             const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
             localStorage.setItem(THEME_KEY, newTheme);
             applyTheme(newTheme);
         }
+
+        // Sayfa yüklendiğinde temayı ve geçmişi ayarla
         document.addEventListener('DOMContentLoaded', () => {
-            const savedTheme = localStorage.getItem(THEME_KEY) || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            // GÜNCELLENDİ: Kayıtlı tema yoksa varsayılan olarak 'koyu' temayı kullan
+            const savedTheme = localStorage.getItem(THEME_KEY) || 'dark';
             applyTheme(savedTheme);
             renderHistory();
         });
     </script>
 </body>
 </html>
+
 
