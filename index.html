@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Prompt Geliştirici</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Inter Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
+    <style>
+        /* Varsayılan olarak açık tema */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: white; /* GÜNCELLEME: Açık Tema Arka Planı saf beyaza (white) ayarlandı */
+        }
+        /* Spotify Koyu Tema Arka Planı */
+        .dark body {
+            background-color: #121212; /* Spotify'a yakın, çok koyu gri */
+        }
+        .line-clamp-2 {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        /* Sidebar'ın sadece masaüstünde çalışması için özel stil */
+        @media (max-width: 767px) {
+            #history-sidebar {
+                display: none; /* Mobil cihazlarda tamamen gizle */
+            }
+        }
+    </style>
+</head>
+<body class="transition-colors duration-300">
+
+    <!-- 1. Sol Kenar Tetikleme Alanı (Görünmez/İnce Çizgi) -->
+    <!-- Fare bu alana geldiğinde sidebar açılır -->
+    <div id="sidebar-trigger" class="fixed top-0 left-0 h-full w-4 z-40 cursor-pointer hidden md:block" onmouseenter="toggleSidebar(true)"></div>
+    
+    <!-- Ana Konteyner -->
+    <div class="min-h-screen"> 
+        
+        <!-- 2. Sol Kenar Çubuğu (Geçmiş) - FIXED OVERLAY -->
+        <!-- GÜNCELLEME: bg-gray-50 yerine açık temada bg-white kullanıldı -->
+        <aside id="history-sidebar" class="fixed top-0 left-0 h-full w-80 bg-white dark:bg-[#1E1E1E] p-4 border-r border-gray-200 dark:border-[#282828] transition-transform duration-300 transform -translate-x-full z-30 shadow-xl flex flex-col" 
+            onmouseleave="toggleSidebar(false)">
+            
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold text-gray-800 dark:text-gray-100">Prompt Geçmişi</h2>
+                <button onclick="clearHistory()" class="text-xs text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 font-medium disabled:opacity-50 transition duration-150" id="clear-history-button" disabled>Temizle</button>
+            </div>
+            <div id="history-list" class="flex-grow overflow-y-auto space-y-3 pr-2">
+                <p id="no-history-message" class="text-gray-500 italic text-sm dark:text-gray-400">Henüz geçmiş yok. Prompt geliştirmeye başlayın.</p>
+                <!-- Geçmiş öğeleri buraya eklenecek -->
+            </div>
+        </aside>
+
+        <!-- 3. Sağ Ana İçerik (Form ve Çıktı) - MAIN CONTENT -->
+        <main class="w-full flex items-start justify-center p-4 md:p-10">
+            <!-- Ana Kart: Açık temada zaten bg-white -->
+            <div class="w-full max-w-4xl bg-white dark:bg-[#1E1E1E] shadow-xl rounded-2xl p-6 border border-indigo-100 dark:border-[#282828] transition-colors duration-300">
+                
+                <!-- Başlık ve Tema Değiştirme -->
+                <header class="text-center mb-8 flex justify-between items-center">
+                    <div class="w-8"></div> <!-- Hizalama için boşluk -->
+                    <div class="flex-grow text-center">
+                        <h1 class="text-3xl font-bold text-indigo-600 dark:text-indigo-400">Prompt Profesyonelleştirici</h1>
+                        <p class="text-gray-500 dark:text-gray-400 mt-2">Yapay zeka modellerinden en iyi sonuçları almak için promptunuzu optimize edin.</p>
+                    </div>
+                    <button id="theme-toggle" onclick="toggleTheme()" class="p-2 rounded-full text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-[#282828] transition duration-150" title="Temayı Değiştir">
+                        <svg id="theme-icon" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <!-- İkon JS ile ayarlanacak -->
+                        </svg>
+                    </button>
+                </header>
+
+                <!-- Giriş Formu -->
+                <div id="input-section" class="space-y-6">
+                    
+                    <!-- Ham Prompt Girişi -->
+                    <div>
+                        <label for="raw-prompt" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">1. Ham Promptunuz</label>
+                        <!-- Açık temada tutarlılık için 'bg-white' -->
+                        <textarea id="raw-prompt" rows="4" class="w-full p-3 border border-gray-300 bg-white dark:border-[#383838] dark:bg-[#282828] dark:text-white rounded-lg focus:ring-indigo-500 focus:border-indigo-500 transition duration-150" placeholder="Örneğin: Uzayda yüzen bir kedi resmi yap."></textarea>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        
+                        <!-- Hedef Yapay Zeka Seçimi -->
+                        <div>
+                            <label for="target-ai" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">2. Hedef Yapay Zeka Platformu</label>
+                            <select id="target-ai" class="w-full p-3 border border-gray-300 dark:border-[#383838] dark:bg-[#282828] dark:text-white bg-white rounded-lg focus:ring-indigo-500 focus:border-indigo-500 appearance-none transition duration-150">
+                                <option value="Gemini">Gemini</option>
+                                <option value="DeepSeek">DeepSeek</option>
+                                <option value="ChatGPT">ChatGPT (GPT Modelleri)</option>
+                            </select>
+                        </div>
+
+                        <!-- İçerik Türü Seçimi -->
+                        <div>
+                            <label for="content-type" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">3. İçerik Türü</label>
+                            <select id="content-type" class="w-full p-3 border border-gray-300 dark:border-[#383838] dark:bg-[#282828] dark:text-white bg-white rounded-lg focus:ring-indigo-500 focus:border-indigo-500 appearance-none transition duration-150">
+                                <option value="Kod">Kod (Profesyonel Prompt Üret)</option>
+                                <option value="Görsel">Görsel (Sanat, Fotoğraf)</option>
+                                <option value="Yazı">Yazı (Makale, Şiir, Hikaye)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- İşlem Butonu -->
+                    <button id="process-button" onclick="professionalizePrompt()" class="w-full py-3 px-4 bg-indigo-600 text-white font-semibold rounded-lg shadow-md hover:bg-indigo-700 focus:outline-none focus:ring-4 focus:ring-indigo-500 focus:ring-opacity-50 transition duration-150 transform hover:scale-[1.01] flex items-center justify-center disabled:opacity-50" disabled>
+                        <span id="button-text">Promtu Profesyonelleştir</span>
+                        <svg id="loading-spinner" class="animate-spin -ml-1 mr-3 h-5 w-5 text-white hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Profesyonel Prompt Çıktısı -->
+                <div id="output-section" class="mt-10 pt-6 border-t border-indigo-200 dark:border-indigo-600">
+                    <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4">4. Profesyonel Prompt Sonucu</h2>
+                    <!-- Açık temada saf beyaz 'bg-white' kullanıldı -->
+                    <div id="professional-prompt-container" class="min-h-[100px] bg-white dark:bg-[#282828] p-4 rounded-lg border border-indigo-300 dark:border-[#383838] relative transition-colors duration-300">
+                        <!-- Açık temada daha koyu font 'text-gray-800' kullanıldı -->
+                        <p id="professional-prompt" class="text-gray-800 dark:text-gray-200 whitespace-pre-wrap">Promtu girmek ve geliştirmek için yukarıdaki formu kullanın.</p>
+                        <button id="copy-button" onclick="copyPrompt()" class="absolute top-2 right-2 p-2 bg-indigo-600 text-white rounded-lg shadow-md hover:bg-indigo-700 text-xs font-medium opacity-0 transition duration-300" title="Kopyala">
+                            Kopyala
+                        </button>
+                    </div>
+                    <div id="copy-message" class="text-sm text-green-600 mt-2 hidden">Kopyalandı!</div>
+                    <div id="error-message" class="text-sm text-red-600 mt-2 hidden"></div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <script type="module">
+        // Sabitler
+        const GROQ_API_KEY = "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";
+        const GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";
+        const MODEL_NAME = "llama-3.1-8b-instant"; 
+        const HISTORY_KEY = 'promptHistory'; 
+        const THEME_KEY = 'promptDevTheme';
+
+        // SVG İkonları
+        const sunIcon = `<svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>`;
+        const moonIcon = `<svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>`;
+
+
+        // DOM Elementleri
+        const rawPromptInput = document.getElementById('raw-prompt');
+        const processButton = document.getElementById('process-button');
+        const loadingSpinner = document.getElementById('loading-spinner');
+        const buttonText = document.getElementById('button-text');
+        const professionalPromptElement = document.getElementById('professional-prompt');
+        const professionalPromptContainer = document.getElementById('professional-prompt-container');
+        const copyButton = document.getElementById('copy-button');
+        const copyMessage = document.getElementById('copy-message');
+        const errorMessageElement = document.getElementById('error-message');
+        const targetAiSelect = document.getElementById('target-ai');
+        const contentTypeSelect = document.getElementById('content-type');
+        
+        // Geçmiş DOM Elementleri
+        const historyList = document.getElementById('history-list');
+        const noHistoryMessage = document.getElementById('no-history-message');
+        const clearHistoryButton = document.getElementById('clear-history-button');
+        const historySidebar = document.getElementById('history-sidebar');
+        const themeIconElement = document.getElementById('theme-icon');
+
+
+        // Girdi Kontrolü ve Buton Etkinleştirme
+        rawPromptInput.addEventListener('input', () => {
+            processButton.disabled = rawPromptInput.value.trim().length < 5;
+        });
+
+        // Kopyalama Butonunun Görünürlüğü
+        professionalPromptContainer.addEventListener('mouseenter', () => {
+            if (professionalPromptElement.innerText.length > 5 && professionalPromptElement.innerText !== 'Promtu girmek ve geliştirmek için yukarıdaki formu kullanın.') {
+                copyButton.classList.remove('opacity-0');
+            }
+        });
+        professionalPromptContainer.addEventListener('mouseleave', () => {
+            copyButton.classList.add('opacity-0');
+        });
+
+        /**
+         * Sidebar'ı fare girişine göre açar/kapatır.
+         */
+        window.toggleSidebar = function(shouldOpen) {
+            // Sadece masaüstü boyutlarında çalışmasını sağlarız
+            if (window.innerWidth < 768) return; 
+
+            if (shouldOpen) {
+                historySidebar.classList.remove('-translate-x-full');
+            } else {
+                historySidebar.classList.add('-translate-x-full');
+            }
+        }
+
+        /**
+         * Başarısız API çağrıları için üstel geri çekilme (exponential backoff) ile yeniden deneme mekanizması.
+         */
+        async function fetchWithRetry(url, options, maxRetries = 5) {
+            for (let i = 0; i < maxRetries; i++) {
+                try {
+                    const response = await fetch(url, options);
+                    if (response.ok) {
+                        return response;
+                    }
+
+                    // Eğer 429 Too Many Requests ise veya genel bir sunucu hatasıysa yeniden dene
+                    if (response.status === 429 || response.status >= 500) {
+                        if (i < maxRetries - 1) {
+                            const delay = Math.pow(2, i) * 1000 + Math.random() * 1000;
+                            console.warn(`API isteği başarısız oldu (Hata Kodu: ${response.status}). ${Math.round(delay / 1000)} saniye sonra tekrar deneniyor...`);
+                            await new Promise(resolve => setTimeout(resolve, delay));
+                            continue;
+                        }
+                    }
+                    
+                    throw new Error(`API Hatası: ${response.status} - ${await response.text()}`);
+
+                } catch (error) {
+                    if (i === maxRetries - 1) {
+                        throw error;
+                    }
+                    const delay = Math.pow(2, i) * 1000 + Math.random() * 1000;
+                    console.error(`Ağ hatası: ${error.message}. ${Math.round(delay / 1000)} saniye sonra tekrar deneniyor...`);
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                }
+            }
+            throw new Error("Maksimum yeniden deneme sayısına ulaşıldı.");
+        }
+
+
+        /**
+         * Prompt geliştirme işlemini başlatır ve Groq API'yi çağırır.
+         */
+        window.professionalizePrompt = async function() {
+            const rawPrompt = rawPromptInput.value.trim();
+            const targetAi = targetAiSelect.value;
+            const contentType = contentTypeSelect.value;
+            
+            errorMessageElement.classList.add('hidden');
+            copyMessage.classList.add('hidden');
+
+            if (rawPrompt.length < 5) {
+                errorMessageElement.innerText = "Lütfen en az 5 karakter uzunluğunda bir prompt girin.";
+                errorMessageElement.classList.remove('hidden');
+                return;
+            }
+
+            // Arayüzü güncelle
+            processButton.disabled = true;
+            loadingSpinner.classList.remove('hidden');
+            buttonText.innerText = 'İşleniyor...';
+            professionalPromptElement.innerText = 'Promptunuz yapay zeka mühendisi tarafından geliştiriliyor...';
+            professionalPromptElement.parentElement.classList.add('animate-pulse');
+            copyButton.classList.add('opacity-0');
+
+
+            // Groq için sistem talimatı (Türkçe, Prompt Mühendisi rolü)
+            let systemInstruction = `Sen dünya standartlarında bir prompt mühendis-isin. Kullanıcının sağladığı ham promptu, belirtilen Hedef Yapay Zeka Platformu ("${targetAi}") ve İçerik Türü ("${contentType}") için en uygun, en detaylı ve en etkili hale getirerek profesyonel bir çıktı promptu oluşturmalısın. Promptu herhangi bir açıklama, giriş, başlık veya ek metin olmadan, sadece arıtılmış prompt metni olarak döndür. Yapay zeka modelinin ne istediğini tam olarak anlamasını sağlayacak şekilde tonu, yapıyı ve detayları iyileştir.`;
+            
+            // KOD seçeneği için özel talimat eklendi: Asla kod yazma, sadece kod yazdırma promptu üret.
+            if (contentType === 'Kod') {
+                systemInstruction += ` İçerik Türü "Kod" olduğu için, ham promptu doğrudan kod üretmesi için değil, başka bir dil modeline gönderilmek üzere, istenen yazılım dilini, fonksiyon amacını, girdi/çıktı formatını ve gerekli kütüphaneleri belirten profesyonel bir PROMPT haline dönüştür. Asla kod üretme, sadece KOD YAZDIRMA PROMPTU üret.`;
+            } else {
+                // Diğer içerik türleri için genel detay ekleme talimatı
+                systemInstruction += ` İçerik Türü "${contentType}" ise, özellikle o türe uygun teknik detayları (örneğin: görsel için stil, çözünürlük; yazı için ton, hedef kitle) ekle.`;
+            }
+
+
+            // Kullanıcı sorgusu
+            const userQuery = `Ham Prompt: ${rawPrompt}`;
+
+            const payload = {
+                model: MODEL_NAME,
+                messages: [
+                    { role: "system", content: systemInstruction },
+                    { role: "user", content: userQuery }
+                ],
+                temperature: 0.7,
+            };
+
+            const options = {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${GROQ_API_KEY}`
+                },
+                body: JSON.stringify(payload)
+            };
+
+            let finalContent = null;
+
+            try {
+                const response = await fetchWithRetry(GROQ_API_URL, options);
+                
+                const result = await response.json();
+                finalContent = result.choices?.[0]?.message?.content?.trim();
+
+                if (finalContent) {
+                    professionalPromptElement.innerText = finalContent;
+                    saveHistory(rawPrompt, finalContent, targetAi, contentType); // Geçmişe kaydet
+                } else {
+                    throw new Error("API'den geçerli bir içerik alınamadı.");
+                }
+
+            } catch (error) {
+                console.error("Prompt geliştirme hatası:", error);
+                errorMessageElement.innerText = `İşlem sırasında bir hata oluştu: ${error.message}`;
+                errorMessageElement.classList.remove('hidden');
+                professionalPromptElement.innerText = 'Hata oluştu. Lütfen konsolu kontrol edin ve tekrar deneyin.';
+            } finally {
+                // Arayüzü eski haline getir
+                professionalPromptElement.parentElement.classList.remove('animate-pulse');
+                processButton.disabled = false;
+                loadingSpinner.classList.add('hidden');
+                buttonText.innerText = 'Promtu Profesyonelleştir';
+                // Başarılıysa kopyalama butonunu göster
+                if (errorMessageElement.classList.contains('hidden') && finalContent) {
+                    copyButton.classList.remove('opacity-0');
+                }
+            }
+        }
+
+        /**
+         * Geçmiş Yönetimi Fonksiyonları
+         */
+        function loadHistory() {
+            try {
+                const history = localStorage.getItem(HISTORY_KEY);
+                return history ? JSON.parse(history) : [];
+            } catch (e) {
+                console.error("Geçmiş yüklenirken hata oluştu:", e);
+                return [];
+            }
+        }
+
+        function saveHistory(raw, professional, ai, type) {
+            const history = loadHistory();
+            const newEntry = {
+                raw: raw,
+                professional: professional,
+                ai: ai,
+                type: type,
+                timestamp: new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })
+            };
+            // Yeni girişi listenin başına ekle
+            history.unshift(newEntry);
+            // Geçmişi 50 ile sınırla (performans için)
+            if (history.length > 50) {
+                history.pop();
+            }
+            try {
+                localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+                renderHistory(); // Geçmişi yeniden çiz
+            } catch (e) {
+                console.error("Geçmiş kaydedilirken hata oluştu:", e);
+            }
+        }
+
+        function renderHistory() {
+            const history = loadHistory();
+            historyList.innerHTML = ''; // Listeyi temizle
+
+            if (history.length === 0) {
+                noHistoryMessage.classList.remove('hidden');
+                clearHistoryButton.disabled = true;
+                return;
+            }
+
+            noHistoryMessage.classList.add('hidden');
+            clearHistoryButton.disabled = false;
+
+            history.forEach((entry, index) => {
+                const item = document.createElement('div');
+                // Estetik iyileştirme: Koyu tema (#282828) ve daha iyi hover efekti (#333333)
+                item.className = 'p-3 bg-white dark:bg-[#282828] border border-gray-200 dark:border-[#383838] rounded-xl shadow-md hover:shadow-lg hover:bg-gray-100 dark:hover:bg-[#333333] transition duration-200 cursor-pointer';
+                item.innerHTML = `
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-700 dark:bg-indigo-700 dark:text-indigo-100">${entry.type} (${entry.ai})</span>
+                        <span class="text-xs text-gray-400 dark:text-gray-500">${entry.timestamp}</span>
+                    </div>
+                    <p class="text-sm font-medium text-gray-800 dark:text-gray-300 line-clamp-2">${entry.raw}</p>
+                `;
+                item.onclick = () => loadHistoryEntry(index);
+                historyList.appendChild(item);
+            });
+        }
+
+        /**
+         * Geçmişteki bir kaydı ana alanlara yükler.
+         */
+        window.loadHistoryEntry = function(index) {
+            const history = loadHistory();
+            const entry = history[index];
+            if (entry) {
+                // Ana alanları yükle
+                rawPromptInput.value = entry.raw;
+                professionalPromptElement.innerText = entry.professional;
+                targetAiSelect.value = entry.ai;
+                contentTypeSelect.value = entry.type;
+                
+                // Kopyala butonunu göster ve giriş butonunu etkinleştir
+                copyButton.classList.remove('opacity-0');
+                processButton.disabled = false;
+                
+                // Başarı mesajı göster
+                showTemporaryMessage("Geçmiş kayıt yüklendi.", 'green');
+                
+                // Sidebar'ı otomatik kapat
+                toggleSidebar(false);
+            }
+        }
+
+        /**
+         * Tüm geçmişi temizler.
+         */
+        window.clearHistory = function() {
+             localStorage.removeItem(HISTORY_KEY);
+             renderHistory(); // Geçmişi temizle ve yeniden çiz
+             showTemporaryMessage("Geçmiş başarıyla temizlendi.", 'green');
+        }
+        
+        /**
+         * Geçici mesajları gösterir (kopyalama/uyarı).
+         */
+        function showTemporaryMessage(message, type) {
+            const msg = document.getElementById('copy-message'); 
+            msg.innerText = message;
+            msg.classList.remove('hidden', 'text-green-600', 'text-red-600');
+            msg.classList.add(type === 'green' ? 'text-green-600' : 'text-red-600');
+            setTimeout(() => msg.classList.add('hidden'), 3000);
+        }
+
+        /**
+         * Profesyonel promptu panoya kopyalar.
+         */
+        window.copyPrompt = function() {
+            const promptText = professionalPromptElement.innerText;
+            
+            // Clipboard API'yi kullanmaya çalış
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(promptText).then(() => {
+                    showTemporaryMessage("Kopyalandı!", 'green');
+                }).catch(err => {
+                    console.error('Panoya kopyalama başarısız oldu (Clipboard API):', err);
+                    // Fallback'e geç
+                    fallbackCopyTextToClipboard(promptText);
+                });
+            } else {
+                // Fallback: execCommand
+                fallbackCopyTextToClipboard(promptText);
+            }
+        }
+
+        /**
+         * Pano API'sinin desteklenmediği tarayıcılar için yedek kopyalama işlevi.
+         */
+        function fallbackCopyTextToClipboard(text) {
+            const textArea = document.createElement("textarea");
+            textArea.value = text;
+            textArea.style.position = "fixed";  // Ekran dışına kaydır
+            textArea.style.left = "-9999px";
+            textArea.style.top = "-9999px";
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            try {
+                const successful = document.execCommand('copy');
+                if (successful) {
+                    showTemporaryMessage("Kopyalandı! (Eski yöntem)", 'green');
+                } else {
+                    throw new Error("execCommand('copy') başarısız oldu.");
+                }
+            } catch (err) {
+                console.error('Panoya kopyalama başarısız oldu (execCommand): ', err);
+                showTemporaryMessage("Kopyalama başarısız oldu.", 'red');
+            }
+            document.body.removeChild(textArea);
+        }
+        
+        /**
+         * Temayı ayarlar ve ikonları günceller.
+         */
+        function setTheme(theme) {
+            const htmlElement = document.documentElement;
+            
+            if (theme === 'dark') {
+                htmlElement.classList.add('dark');
+                localStorage.setItem(THEME_KEY, 'dark');
+                themeIconElement.innerHTML = sunIcon; // Karanlık moddayken güneş ikonunu göster
+            } else {
+                htmlElement.classList.remove('dark');
+                localStorage.setItem(THEME_KEY, 'light');
+                themeIconElement.innerHTML = moonIcon; // Açık moddayken ay ikonunu göster
+            }
+        }
+
+        /**
+         * Temayı değiştirir.
+         */
+        window.toggleTheme = function() {
+            const currentTheme = localStorage.getItem(THEME_KEY) || 
+                                (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            setTheme(newTheme);
+        }
+
+        /**
+         * Temayı başlangıçta yükler.
+         */
+        function initializeTheme() {
+            const savedTheme = localStorage.getItem(THEME_KEY);
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            
+            let initialTheme = 'light';
+            if (savedTheme) {
+                initialTheme = savedTheme;
+            } else if (prefersDark) {
+                initialTheme = 'dark';
+            }
+            
+            setTheme(initialTheme);
+        }
+
+
+        // Sayfa yüklendiğinde butonu etkinleştirme kontrolü ve Geçmişi yükleme
+        window.onload = () => {
+             initializeTheme(); // Tema başlangıçta yüklenecek
+             processButton.disabled = rawPromptInput.value.trim().length < 5;
+             renderHistory(); // Geçmişi yükle ve göster
+             console.log("Firebase/Firestore kullanılmadığı için LogLevel ayarlanmadı. API işlemlerinde hata olursa lütfen konsolu kontrol edin.");
+        }
+    </script>
+</body>
+</html>
